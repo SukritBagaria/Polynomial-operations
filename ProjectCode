@@ -1,0 +1,81 @@
+class Polynomial:
+  def __init__(self,coefficients):
+    if not isinstance(coefficients,dict):
+      raise ValueError("coefficients need to be a dictionary")
+    self.coeff = coefficients
+    self.degree = max(self.get_powers())
+   
+  def __str__(self):
+    rep = ''
+    for power in sorted(self.get_powers() , reverse = True):
+      coeff = self.coeff[power]
+      if(power!=self.degree and rep!=''):
+        if coeff > 0 :
+          rep+=' + '
+        elif coeff < 0 :
+          rep+=" - "
+        else:
+          continue
+         
+        coeff = abs(coeff)
+      rep += self.add_term(power,coeff)
+       
+    return rep
+   
+  @staticmethod
+  def add_term(power,coeff):
+    rep = ''
+    if coeff == 0:
+      return rep
+    elif power>=1:
+      
+      rep += '{}x^{}'.format(coeff,power)
+     
+    elif(power == 0):
+      rep += '{}'.format(coeff)
+       
+    return rep
+   
+   
+  def fill_terms(self,coeff):
+    for keys in coeff:
+      self.coeff[keys] = 0
+   
+  def __add__(self, other):
+    coefficients = {}
+    extra_powers = set(self.get_powers()) ^ set(other.get_powers())
+    if(self.degree > other.degree):
+      other.fill_terms(extra_powers)
+    elif(self.degree < other.degree):
+      self.fill_terms(extra_powers)
+       
+    for key in set(self.get_powers()) | set(other.get_powers()):
+      coefficients[key] = self.coeff[key] + other.coeff[key]
+    return Polynomial(coefficients)
+     
+  def get_powers(self):
+    return sorted(self.coeff.keys(), reverse=True)   
+     
+  def __mul__(self,other):
+    from collections import defaultdict
+    coeff = defaultdict(lambda: 0)
+    for Lpower in self.get_powers():
+      for Rpower in other.get_powers():
+        coeff[Lpower + Rpower] += self.coeff[Lpower]*other.coeff[Rpower]
+    return Polynomial(dict(coeff))
+     
+     
+degree1 = int(input())
+coeff_dict1 = dict()
+for i in range(degree1):
+  p,c = input().split()
+  coeff_dict1[int(p)] = int(c)
+
+degree2 = int(input())
+coeff_dict2 = dict()
+for i in range(degree2):
+  p,c = input().split()
+  coeff_dict2[int(p)] = int(c)    
+
+
+print(Polynomial(coeff_dict1) * Polynomial(coeff_dict2))     
